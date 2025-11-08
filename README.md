@@ -1,2 +1,21 @@
-# dist_chat
-Distributed Chat System in Erlang
+# Erlang Distributed Chat
+A simple **distributed chat system** written in **Erlang**, built and managed using **Rebar3**.
+
+## 🚀 Requirements
+You’ll need the following installed:
+
+- **Erlang/OTP** ≥ 25
+- **Rebar3** ≥ 3.20
+
+## How to run
+1. Compile the Project.  
+in the root directory of the project run:  
+`rebar3 compile`
+2. Start the Server in a new terminal window.  
+`erl -pa _build/default/lib/dist_chat/ebin -sname node1@localhost -setcookie mycookie`  
+`chat_server:start().` 
+3. Start the Client in another terminal window.  
+`erl -pa _build/default/lib/dist_chat/ebin -sname node2@localhost -setcookie mycookie`  
+`chat_listener:start('node1@localhost').`
+4. Send a message from the Client to the Server.  
+`{chat_server, 'node1@localhost'} ! {broadcast, "Hello from Node 2!"}.` 
