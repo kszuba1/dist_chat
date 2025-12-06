@@ -14,8 +14,12 @@ in the root directory of the project run:
 2. Start the Server in a new terminal window.  
 `erl -pa _build/default/lib/dist_chat/ebin -sname node1@localhost -setcookie mycookie`  
 `chat_server:start().` 
-3. Start the Client in another terminal window.  
+3. Start the Client with a nickname in another terminal window.  
 `erl -pa _build/default/lib/dist_chat/ebin -sname node2@localhost -setcookie mycookie`  
-`chat_listener:start('node1@localhost').`
+`P = chat_listener:start('node1@localhost', "Anna").`
 4. Send a message from the Client to the Server.  
-`{chat_server, 'node1@localhost'} ! {broadcast, "Hello from Node 2!"}.` 
+`P ! {say, "Hello everyone!"}.` 
+5. Client checks who is online
+`P ! who_is_online.`
+6. Server checks who is online
+`chat_server:print_users().`
