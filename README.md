@@ -23,3 +23,5 @@ in the root directory of the project run:
 `P ! who_is_online.`
 6. Server checks who is online
 `chat_server:print_users().`
+7. Send whisper
+`P ! {whisper, "Tomek", "To jest tajna wiadomość!"}.`
