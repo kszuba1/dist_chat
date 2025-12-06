@@ -1,5 +1,5 @@
 -module(chat_listener).
--export([start/2, init/3, loop/1]). %% Export init so spawn can use it
+-export([start/2, init/3, loop/1]).
 
 %% @doc Starts the listener.
 start(ServerNode, Nick) ->
@@ -20,7 +20,7 @@ start(ServerNode, Nick) ->
       {error, Reason}
   end.
 
-%% @doc Internal initialization. Sends subscribe and waits for server reply.
+%% @doc Internal initialization.
 init(ServerNode, Parent, Nick) ->
   %% Send subscription request to server
   {chat_server, ServerNode} ! {subscribe, self(), Nick},
@@ -50,7 +50,26 @@ loop(ServerNode) ->
       {chat_server, ServerNode} ! {broadcast, self(), Message},
       loop(ServerNode);
 
+  %% NEW: User command to check online users
+    who_is_online ->
+      %% Send request to server
+      {chat_server, ServerNode} ! {get_users, self()},
+      loop(ServerNode);
+
+  %% NEW: Handle the response from server
+    {users_list, Nicks} ->
+      io:format("~n--- Online Users ---~n"),
+      print_list(Nicks),
+      io:format("--------------------~n"),
+      loop(ServerNode);
+
     Other ->
       io:format("Listener: Received unknown message: ~p~n", [Other]),
       loop(ServerNode)
   end.
+
+%% Helper function to print list nicely
+print_list([]) -> ok;
+print_list([H|T]) ->
+  io:format(" * ~s~n", [H]),
+  print_list(T).

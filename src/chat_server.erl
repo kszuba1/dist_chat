@@ -36,6 +36,15 @@ loop(Clients) ->
           loop(Clients)
       end;
 
+  %% NEW: Handle "Who is online" request
+    {get_users, RequesterPid} ->
+      io:format("Server: Sending user list to ~p~n", [RequesterPid]),
+      %% Extract only the Nicknames from the state tuples
+      %% Clients = [{Nick, Pid}, ...] -> Nicks = [Nick, ...]
+      Nicks = [N || {N, _} <- Clients],
+      RequesterPid ! {users_list, Nicks},
+      loop(Clients);
+
     Other ->
       io:format("Server: Received unknown message: ~p~n", [Other]),
       loop(Clients)
