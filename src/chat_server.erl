@@ -2,35 +2,41 @@
 -author("kszuba").
 -export([start/0, loop/1]).
 
-%% start the chat server process and registers it.
+%% @doc Starts the chat server process and registers it globally.
 start() ->
   io:format("Chat server starting...~n"),
-  % create loop function with an empty list of clients
   Pid = spawn(?MODULE, loop, [[]]),
-  % register the process with the name 'chat_server'.
   register(chat_server, Pid),
   io:format("Chat server started with Pid ~p~n", [Pid]),
   Pid.
 
-% main server loop. It waits for messages.
-% state - list of Pids of all connected listeners.
-loop(Listeners) ->
+%% @doc The main server loop. Clients is a list of {Nick, Pid}.
+loop(Clients) ->
   receive
-  % new listener wants to subscribe
-    {subscribe, ListenerPid} ->
-      io:format("Server: New listener subscribed: ~p~n", [ListenerPid]),
-      % Add the new listener to the list and loop again
-      loop([ListenerPid | Listeners]);
+    {subscribe, ListenerPid, Nick} ->
+      case lists:keymember(Nick, 1, Clients) of
+        true ->
+          io:format("Server: Nick '~s' is already taken.~n", [Nick]),
+          ListenerPid ! {subscribe_result, error, "Nick taken"},
+          loop(Clients);
+        false ->
+          io:format("Server: New user '~s' joined (~p)~n", [Nick, ListenerPid]),
+          ListenerPid ! {subscribe_result, ok},
+          loop([{Nick, ListenerPid} | Clients])
+      end;
 
-  %  broadcast message is received
-    {broadcast, Message} ->
-      io:format("Server: Broadcasting '~p' to ~p listeners~n", [Message, length(Listeners)]),
-      % send the chat message to every listener in the list
-      [Listener ! {chat_msg, Message} || Listener <- Listeners],
-      % loop again with the same list of listeners
-      loop(Listeners);
+    {broadcast, SenderPid, Message} ->
+      case lists:keyfind(SenderPid, 2, Clients) of
+        {SenderNick, _} ->
+          io:format("Server: Broadcasting message from '~s'~n", [SenderNick]),
+          [Pid ! {chat_msg, SenderNick, Message} || {_, Pid} <- Clients],
+          loop(Clients);
+        false ->
+          io:format("Server: Unknown sender ~p tried to broadcast~n", [SenderPid]),
+          loop(Clients)
+      end;
 
     Other ->
       io:format("Server: Received unknown message: ~p~n", [Other]),
-      loop(Listeners)
+      loop(Clients)
   end.
