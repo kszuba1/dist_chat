@@ -2,6 +2,11 @@
 -author("kszuba").
 -export([start/0, print_users/0, loop/2]).
 
+%% Export helper functions for testing
+-ifdef(TEST).
+-export([add_user_to_room/3, remove_user_from_room/3, broadcast_to_room/5]).
+-endif.
+
 start() ->
   print_server_banner(),
   chat_ui:format_info("Initializing chat server..."),

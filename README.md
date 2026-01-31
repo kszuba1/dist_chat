@@ -12,12 +12,16 @@ A **distributed chat system** written in **Erlang/OTP**, built and managed using
 ```
 dist_chat/
 ├── src/
-│   ├── chat_server.erl    # Server: manages users, routes messages
+│   ├── chat_server.erl    # Server: manages users, rooms, routes messages
 │   ├── chat_listener.erl  # Client: connects to server, sends/receives messages
 │   ├── chat_ui.erl        # UI helpers: colors, formatting, timestamps
 │   ├── dist_chat_app.erl  # OTP application module
 │   ├── dist_chat_sup.erl  # OTP supervisor
 │   └── dist_chat.app.src  # Application config
+├── test/
+│   ├── chat_server_tests.erl   # Server & room management tests
+│   ├── chat_listener_tests.erl # Client command tests
+│   └── chat_ui_tests.erl       # UI formatting tests
 └── rebar.config           # Build configuration
 ```
 
@@ -317,3 +321,46 @@ P3 = chat_listener:start('server@localhost', "Maria").
 ```
 
 All clients will receive join notifications when new users connect.
+
+## Running Tests
+
+The project includes comprehensive EUnit tests for all modules.
+
+### Run All Tests
+
+```bash
+rebar3 eunit
+```
+
+Output:
+```
+===> Performing EUnit tests...
+======================== EUnit ========================
+...
+=======================================================
+  All 61 tests passed.
+```
+
+### Run Tests with Coverage
+
+```bash
+rebar3 eunit --cover
+rebar3 cover
+```
+
+### Test Structure
+
+```
+test/
+├── chat_server_tests.erl   # Server & room management tests (25 tests)
+├── chat_listener_tests.erl # Client command & integration tests (12 tests)
+└── chat_ui_tests.erl       # UI formatting tests (24 tests)
+```
+
+### Test Categories
+
+| Module | Tests | Description |
+|--------|-------|-------------|
+| `chat_server_tests` | 25 | Room helper functions, server process, room management, messaging |
+| `chat_listener_tests` | 12 | Client commands, multi-client scenarios, room isolation |
+| `chat_ui_tests` | 24 | Color functions, timestamps, message formatting |
